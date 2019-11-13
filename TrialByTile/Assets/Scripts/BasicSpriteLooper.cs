@@ -21,7 +21,6 @@ public class BasicSpriteLooper : MonoBehaviour
         if(m_Timer >= m_SecondsPerFrame)
         {
             m_Timer -= m_SecondsPerFrame;
-            Debug.Log(m_Sprites.Length);
             m_CurrentFrame = (m_CurrentFrame + 1) % m_Sprites.Length;
             m_SpriteRenderer.sprite = m_Sprites[m_CurrentFrame];
         }

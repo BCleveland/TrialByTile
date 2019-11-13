@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : Entity
 {
+    public static PlayerController i;
+
+    [SerializeField] private Attack[] m_Attacks = null;
     [SerializeField] private Meter m_EnduranceMeter = null;
     [SerializeField] private GameObject[] m_MoveIndicators = null;
     private Vector2Int[] m_Dirs = new Vector2Int[4]
@@ -14,7 +17,6 @@ public class PlayerController : MonoBehaviour
         new Vector2Int(-1, 0)
     };
 
-    private Vector2Int m_Position;
 
     //Stamina
     private float m_EnduranceTime = 1.0f;
@@ -23,7 +25,12 @@ public class PlayerController : MonoBehaviour
 
     private void Awake() 
     {
+        i = this;
         UpdateValidMoves();
+    }
+    private void Start() 
+    {
+        World.i.PlaceEntity(this, Vector2Int.RoundToInt(transform.position));    
     }
     private void Update() 
     {
@@ -50,17 +57,42 @@ public class PlayerController : MonoBehaviour
     }
     public void ReceiveInput(Vector2Int tileIndex)
     {
-        Vector2Int diff = m_Position - tileIndex;
-        if(diff.sqrMagnitude == 1)
+        if(m_isEnduranceFull)
         {
-            if(World.i.IsValidMovePosition(tileIndex) && m_isEnduranceFull)
+            Vector2Int diff = GridPosition - tileIndex;
+            if(diff.sqrMagnitude == 1 && World.i.IsValidMovePosition(tileIndex))
             {
-                m_Position = tileIndex;
-                transform.position = (Vector3Int)m_Position;
+                World.i.UpdateEntityPosition(this, GridPosition, tileIndex);
+                GridPosition = tileIndex;
                 UpdateValidMoves();
                 UseEndurance(0.75f);
             }
+            //Impossible to move and attack in the same tap
+            else
+            {
+                List<Attack> validAttacks = new List<Attack>();
+                for(int j = 0; j < m_Attacks.Length; j++)
+                {
+                    if(m_Attacks[j].IsValidAttack(diff))
+                    {
+                        validAttacks.Add(m_Attacks[j]);
+                    }
+                }
+                if(validAttacks.Count == 1)
+                {
+                    UseAttack(validAttacks[0], World.i.GetEntity(tileIndex));
+                }
+                else if(validAttacks.Count > 1)
+                {
+                    //Do multi-attack menu here
+                }
+            }
         }
+    }
+    private void UseAttack(Attack attack, Entity target)
+    {
+        target.TakeDamage(attack.CalculateDamage(this));
+        UseEndurance(attack.EnduranceUsage);
     }
     private void UseEndurance(float duration)
     {
@@ -80,11 +112,11 @@ public class PlayerController : MonoBehaviour
             r.color = color;
         }
     }
-    private void UpdateValidMoves()
+    public void UpdateValidMoves()
     {
         for(int j = 0; j < m_MoveIndicators.Length; j++)
         {
-            m_MoveIndicators[j].SetActive(World.i.IsValidMovePosition(m_Position + m_Dirs[j]));
+            m_MoveIndicators[j].SetActive(World.i.IsValidMovePosition(GridPosition + m_Dirs[j]));
         }
     }
 }
