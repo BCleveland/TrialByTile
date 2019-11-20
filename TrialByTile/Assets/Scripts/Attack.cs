@@ -9,10 +9,6 @@ public class Attack : ScriptableObject
     [SerializeField] public int LowDamage;
     [SerializeField] public int HighDamage;
     [SerializeField] public float EnduranceUsage;
-    public int CalculateDamage(PlayerController user)
-    {
-        return Random.Range(LowDamage, HighDamage);
-    }
     public bool IsValidAttack(Vector2Int difference)
     {
         for(int j = 0; j < Ranges.Length; j++)
@@ -20,5 +16,12 @@ public class Attack : ScriptableObject
             if(Ranges[j] == difference) return true;
         }
         return false;
+    }
+    public void AddSelfToTiles(Vector2Int playerPos)
+    {
+        for(int j = 0; j < Ranges.Length; j++)
+        {
+            World.i.AddAttacksToTile(this, playerPos+Ranges[j]);
+        }
     }
 }

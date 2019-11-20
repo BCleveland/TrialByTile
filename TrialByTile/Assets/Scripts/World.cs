@@ -18,6 +18,18 @@ public class World : MonoBehaviour
             m_Map.Add(child.GridPosition, child);
         }    
     }
+    public void AddAttacksToTile(Attack attack, Vector2Int pos)
+    {
+        if(m_Map.ContainsKey(pos))
+            m_Map[pos].AccumulateAttackIndicators(attack);
+    }
+    public void FinalizeAttacks()
+    {
+        foreach(WorldTile tile in m_Map.Values)
+        {
+            tile.ShowAttackIndicators();
+        }
+    }
     public bool IsValidMovePosition(Vector2Int pos)
     {
         //Position is in map, and no entity is standing there
