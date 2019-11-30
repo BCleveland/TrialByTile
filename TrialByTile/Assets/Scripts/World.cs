@@ -25,6 +25,7 @@ public class World : MonoBehaviour
     }
     public void FinalizeAttacks()
     {
+        AttackIndicatorManager.i.ResetAttackIndicators();
         foreach(WorldTile tile in m_Map.Values)
         {
             tile.ShowAttackIndicators();

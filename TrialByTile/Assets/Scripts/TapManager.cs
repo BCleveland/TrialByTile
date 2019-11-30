@@ -18,5 +18,9 @@ public class TapManager : MonoBehaviour
         {
             m_Player.ReceiveInput(Vector2Int.RoundToInt(m_Camera.ScreenToWorldPoint(Input.mousePosition)));
         }
+        if(Input.GetMouseButtonUp(0))
+        {
+            m_Player.RecieveUpInput(m_Camera.ScreenToWorldPoint(Input.mousePosition));
+        }
     }
 }

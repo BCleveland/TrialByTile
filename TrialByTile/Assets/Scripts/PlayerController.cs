@@ -32,10 +32,14 @@ public class PlayerController : Entity
     private float m_EnduranceTotal = 1.0f;
     private bool m_isEnduranceFull = true;
 
+    //Attack indicator Menu
+    private Vector2Int m_TargetedTile;
+    private bool m_IsInIndicatorSelect = false;
+    private List<Attack> m_ValidSelectedAttacks;
+
     private void Awake() 
     {
         i = this;
-        UpdateValidMoves();
         m_Stats = new Dictionary<Stat, int>();
         m_Stats.Add(Stat.STR, 1);
         m_Stats.Add(Stat.DEX, 5);
@@ -44,6 +48,7 @@ public class PlayerController : Entity
     private void Start() 
     {
         World.i.PlaceEntity(this, Vector2Int.RoundToInt(transform.position));    
+        UpdateValidMoves();
     }
     private void Update() 
     {
@@ -98,9 +103,51 @@ public class PlayerController : Entity
                 else if(validAttacks.Count > 1)
                 {
                     //Do multi-attack menu here
+                    m_ValidSelectedAttacks = validAttacks;
+                    //Track the tapped tile
+                    m_TargetedTile = tileIndex;
+                    //Wait for release, calculate angle and UseAttack() at that index
+                    m_IsInIndicatorSelect = true;
                 }
             }
         }
+    }
+    public void RecieveUpInput(Vector2 pos)
+    {
+        if(!m_IsInIndicatorSelect) return;
+        Vector2 from = m_TargetedTile;
+        Vector2 diff = pos - from;
+        float angle = Mathf.Rad2Deg * Mathf.Atan2(diff.y, diff.x) + 180f;
+        Debug.Log(angle);
+        if(m_ValidSelectedAttacks.Count == 2)
+        {
+            if(angle > 45 && angle < 225)
+            {
+                //Select BottomRight
+                UseAttack(m_ValidSelectedAttacks[1], World.i.GetEntity(m_TargetedTile));
+            }
+            else
+            {
+                //Select TopLeft
+                UseAttack(m_ValidSelectedAttacks[0], World.i.GetEntity(m_TargetedTile));
+            }
+        }
+        else if(m_ValidSelectedAttacks.Count == 3)
+        {
+            if(angle < 320 && angle > 220)
+            {
+                UseAttack(m_ValidSelectedAttacks[1], World.i.GetEntity(m_TargetedTile));
+            }
+            else if(angle > 90 && angle <= 220)
+            {
+                UseAttack(m_ValidSelectedAttacks[2], World.i.GetEntity(m_TargetedTile));
+            }
+            else
+            {
+                UseAttack(m_ValidSelectedAttacks[0], World.i.GetEntity(m_TargetedTile));
+            }
+        }
+        m_IsInIndicatorSelect = false;
     }
     private void UseAttack(Attack attack, Entity target)
     {

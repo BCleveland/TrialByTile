@@ -20,3 +20,5 @@ MonoBehaviour:
   LowDamage: 3
   HighDamage: 7
   EnduranceUsage: 0.6
+  BackgroundColor: {r: 1, g: 0, b: 0, a: 0.50980395}
+  Sprite: {fileID: 21300000, guid: a6fc654062b5ca0448e473c60493de67, type: 3}
