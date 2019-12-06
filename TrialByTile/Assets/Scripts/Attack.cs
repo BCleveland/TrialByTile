@@ -12,6 +12,7 @@ public class Attack : ScriptableObject
     [Header("Visual")]
     [SerializeField] public Color BackgroundColor;
     [SerializeField] public Sprite Sprite;
+    [System.NonSerialized] public int HotbarLocation = -1;
     public bool IsValidAttack(Vector2Int difference)
     {
         for(int j = 0; j < Ranges.Length; j++)

@@ -14,7 +14,6 @@ public class PlayerController : Entity
     [SerializeField] private Attack[] m_Attacks = null;
     [SerializeField] private GameObject[] m_MoveIndicators = null;
     [Header("Endurance")]
-    [SerializeField] private Meter m_EnduranceMeter = null;
     [SerializeField] private float m_EnduranceMinTime = 0.4f;
     [SerializeField] private float m_EnduranceMaxTime = 1.2f;
     private Vector2Int[] m_Dirs = new Vector2Int[4]
@@ -27,10 +26,6 @@ public class PlayerController : Entity
 
     private Dictionary<Stat, int> m_Stats;
 
-    //Stamina
-    private float m_EnduranceTime = 1.0f;
-    private float m_EnduranceTotal = 1.0f;
-    private bool m_isEnduranceFull = true;
 
     //Attack indicator Menu
     private Vector2Int m_TargetedTile;
@@ -44,11 +39,19 @@ public class PlayerController : Entity
         m_Stats.Add(Stat.STR, 1);
         m_Stats.Add(Stat.DEX, 5);
         m_Stats.Add(Stat.INT, 1);
+
+        for(int j = 0; j < m_Attacks.Length; j++)
+        {
+            m_Attacks[j] = ScriptableObject.Instantiate(m_Attacks[j]);
+            m_Attacks[j].HotbarLocation = j;
+        }
     }
     private void Start() 
     {
         World.i.PlaceEntity(this, Vector2Int.RoundToInt(transform.position));    
         UpdateValidMoves();
+
+        AbilityIndicators.i.UpdateAbilities(new List<Attack>(m_Attacks));
     }
     private void Update() 
     {
@@ -118,17 +121,14 @@ public class PlayerController : Entity
         Vector2 from = m_TargetedTile;
         Vector2 diff = pos - from;
         float angle = Mathf.Rad2Deg * Mathf.Atan2(diff.y, diff.x) + 180f;
-        Debug.Log(angle);
         if(m_ValidSelectedAttacks.Count == 2)
         {
             if(angle > 45 && angle < 225)
             {
-                //Select BottomRight
                 UseAttack(m_ValidSelectedAttacks[1], World.i.GetEntity(m_TargetedTile));
             }
             else
             {
-                //Select TopLeft
                 UseAttack(m_ValidSelectedAttacks[0], World.i.GetEntity(m_TargetedTile));
             }
         }
@@ -153,6 +153,7 @@ public class PlayerController : Entity
     {
         target.TakeDamage(Mathf.RoundToInt(CalculateOnStat(Stat.STR, attack.LowDamage, attack.HighDamage)));
         UseEndurance(attack.EnduranceUsage);
+        AbilityIndicators.i.UseAbility(attack.HotbarLocation, 1.5f);
     }
     private void UseEndurance(float duration)
     {

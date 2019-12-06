@@ -4,10 +4,16 @@ using UnityEngine;
 
 public class Entity : MonoBehaviour
 {
-    [SerializeField] private Meter m_HealthBar = null;
+    [SerializeField] protected Meter m_HealthBar = null;
+    [SerializeField] protected Meter m_EnduranceMeter = null;
 
     protected int m_CurrentHealth = 10;
     private Vector2Int m_GridPosition;
+    
+    //Stamina
+    protected float m_EnduranceTime = 1.0f;
+    protected float m_EnduranceTotal = 1.0f;
+    protected bool m_isEnduranceFull = true;
     public Vector2Int GridPosition 
     {
         get
